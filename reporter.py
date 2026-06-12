@@ -166,6 +166,12 @@ def _generate_solo(s: dict) -> str:
 def _align_histories(s1: dict, s2: dict) -> tuple[list, list, list]:
     common = set(s1["history_dates"]) & set(s2["history_dates"])
     dates = sorted(common)
+    if not dates:
+        raise ValueError(
+            f"No overlapping trading dates found between {s1['ticker']} and {s2['ticker']}. "
+            "They may trade on different exchanges with incompatible calendars. "
+            "Try comparing two stocks from the same exchange, or run a single stock report for each individually."
+        )
     idx1 = {d: p for d, p in zip(s1["history_dates"], s1["history_prices"])}
     idx2 = {d: p for d, p in zip(s2["history_dates"], s2["history_prices"])}
     return dates, [idx1[d] for d in dates], [idx2[d] for d in dates]
