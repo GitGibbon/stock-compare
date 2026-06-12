@@ -163,16 +163,25 @@ def _generate_solo(s: dict) -> str:
 </html>"""
 
 
+def _align_histories(s1: dict, s2: dict) -> tuple[list, list, list]:
+    common = set(s1["history_dates"]) & set(s2["history_dates"])
+    dates = sorted(common)
+    idx1 = {d: p for d, p in zip(s1["history_dates"], s1["history_prices"])}
+    idx2 = {d: p for d, p in zip(s2["history_dates"], s2["history_prices"])}
+    return dates, [idx1[d] for d in dates], [idx2[d] for d in dates]
+
+
 def _generate_comparison(s1: dict, s2: dict) -> str:
     rows = "".join(
         f'<tr><td class="metric-label">{label}</td><td>{fn(s1)}</td><td>{fn(s2)}</td></tr>'
         for label, fn in _METRICS
     )
-    dates_json = json.dumps(s1["history_dates"])
+    dates, prices1, prices2 = _align_histories(s1, s2)
+    dates_json = json.dumps(dates)
     datasets = [
         {
             "label": s1["ticker"],
-            "data": s1["history_prices"],
+            "data": prices1,
             "borderColor": "#6366f1",
             "backgroundColor": "rgba(99,102,241,0.08)",
             "borderWidth": 2,
@@ -182,7 +191,7 @@ def _generate_comparison(s1: dict, s2: dict) -> str:
         },
         {
             "label": s2["ticker"],
-            "data": s2["history_prices"],
+            "data": prices2,
             "borderColor": "#22d3ee",
             "backgroundColor": "rgba(34,211,238,0.08)",
             "borderWidth": 2,
