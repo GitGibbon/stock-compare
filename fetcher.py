@@ -6,8 +6,8 @@ def fetch_stock_data(ticker: str) -> dict:
     info = stock.info
     history = stock.history(period="1y")
 
-    if history.empty:
-        raise ValueError(f"No data found for ticker '{ticker}'. Check that it's a valid symbol.")
+    if history.empty or not info or info.get("regularMarketPrice") is None and info.get("currentPrice") is None:
+        raise ValueError(f"'{ticker}' doesn't look like a valid ticker. Check the symbol and try again.")
 
     daily_returns = history["Close"].pct_change().dropna()
     annualized_volatility = daily_returns.std() * (252 ** 0.5)
